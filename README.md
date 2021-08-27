@@ -20,7 +20,9 @@ This project brings the same form factor for a considerably cheaper this way (es
 
 The kobo e-readers have a micro-usb connector to charge and transfer files. With proper kernel modification this usb socket can be used as OTG, letting one plug in any kind of usb device.
 
-Such kernel was compiled by the XCSoar project in order to turn the kobo into a fliying assistant supported by an external GPS. We use their modifications to connect a USB keyboard to the OTG port.
+Such kernel was compiled by the [XCSoar](https://github.com/XCSoar/XCSoar) project in order to turn the kobo into a fliying assistant supported by an external GPS. 
+
+We use their modifications to connect a USB keyboard to the OTG port.
 
 However, the kobo giving no power throught its usb socket, the keyboard has to be powered on its own - you can either use a cheap usb otg power cable [like this one](https://www.amazon.com/AuviPal-Micro-USB-Cable-Power/dp/B07FY9Z9GD/ref=sr_1_3?crid=13TQ5BP3TUJT5&dchild=1&keywords=powered+usb+otg&qid=1630094365&sprefix=powered+%2Caps%2C536&sr=8-3) or modify some keyboard, like I did.
 
@@ -33,4 +35,22 @@ First you need to download and build the **koxtoolchain** on you development com
 
 ## How to install
 
-You can build the software, or we provide pre compiled binaries. You can also use our XCSoar modified installer that will get you the XCSoar program, kernel, and Kobowriter in just one step.
+You can build the software, put it on a KOBO with XCSoar software, and launch it any way you see fit.
+
+Or you can use our modified XCSoar installer that will get you the XCSoar program, kernel, and Kobowriter in just one step :
+
+- Download the `KoboRoot.tar.gz` from the release page
+- Connect your kobo and place the archive in the .kobo (hidden) directory
+- eject safely, unplug, and let the kobo update
+  
+Form now on your kobo will start up on XCSoar launcher. Form there you can start the stock kobo software, turn on usb-otg or start the KoboWriter.
+
+> Note that when USB-OTG is enable, you won't be able to start the stock Kobo software. But you need to have it on in order to use the KoboWriter software. Changing USB-OTG setting require a restart.
+
+- When you start the KOBO, if not activated yet, from the XCSoar laucher tap on `system` and the `enable USB-OTG` and then restart the device.
+
+If like me you use the KOBO only for KoboWriter, then your device should always boot in this state. In this case, only this last step is required :
+
+- From XCSoar launcher tap `tools` and then `KoboWriter`.
+
+Plugin you powered usb kayboard and you should be good to go ;-)
