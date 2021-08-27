@@ -1,4 +1,6 @@
-![Kobowriter Logo](assets/kobowriter.png)
+<p align="center">
+  <img src="assets/kobowriter.png" />
+</p>
 
 # Kobowriter
 
