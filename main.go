@@ -65,6 +65,10 @@ func main() {
 			unmount = menuMount(&screen, bus)
 		case "file-menu":
 			unmount = fileMenuMount(&screen, bus)
+		case "settings-menu":
+			unmount = settingsMenuMount(&screen, bus)
+		case "qr":
+			unmount = mountQr(&screen, bus)
 
 		default:
 			unmount = documentMount(&screen, bus, "")

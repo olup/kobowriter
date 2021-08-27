@@ -71,6 +71,7 @@ func menuMount(screen *Screen, bus EventBus.Bus) func() {
 		{
 			label: "Export as QR code",
 			action: func() {
+				bus.Publish("ROUTING", "qr")
 			},
 		},
 		{
@@ -92,6 +93,12 @@ func menuMount(screen *Screen, bus EventBus.Bus) func() {
 			},
 		},
 		{
+			label: "Settings",
+			action: func() {
+				bus.Publish("ROUTING", "settings-menu")
+			},
+		},
+		{
 			label: "Quit to XCSoar",
 			action: func() {
 				exec.Command("/opt/xcsoar/bin/KoboMenu").Start()
@@ -100,8 +107,7 @@ func menuMount(screen *Screen, bus EventBus.Bus) func() {
 		},
 	}
 
-	battreryCapacity, _ := os.ReadFile("/sys/class/power_supply/mc13892_bat/capacity")
-	return createMenu("Menu / BAT "+string(battreryCapacity)+"%", options)(screen, bus)
+	return createMenu("Menu", options)(screen, bus)
 }
 
 func fileMenuMount(screen *Screen, bus EventBus.Bus) func() {
@@ -137,6 +143,36 @@ func fileMenuMount(screen *Screen, bus EventBus.Bus) func() {
 			})
 		}
 
+	}
+
+	return createMenu("Open File", options)(screen, bus)
+}
+
+func settingsMenuMount(screen *Screen, bus EventBus.Bus) func() {
+	options := []Option{
+		{
+			label: "Back",
+			action: func() {
+				bus.Publish("ROUTING", "menu")
+			},
+		},
+		{
+			label: "Toggle light",
+			action: func() {
+				lightPath := "/sys/class/backlight/mxc_msp430_fl.0/brightness"
+				light := "0"
+				presentLightRaw, _ := os.ReadFile(lightPath)
+				presentLight := strings.TrimSuffix(string(presentLightRaw), "\n")
+
+				if presentLight == "0" {
+					light = "10"
+				} else {
+					light = "0"
+				}
+
+				os.WriteFile(lightPath, []byte(light), os.ModePerm)
+			},
+		},
 	}
 
 	return createMenu("Open File", options)(screen, bus)

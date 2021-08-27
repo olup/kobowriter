@@ -1,3 +1,5 @@
+![Kobowriter Logo](assets/kobowriter.png)
+
 # Kobowriter
 
 Turn your old KOBO e-reader into a distraction-free typewriter. Like a Freewrite or a Pomera - but very very cheap.
