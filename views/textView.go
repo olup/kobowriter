@@ -1,8 +1,11 @@
-package main
+package views
 
 import (
 	"strings"
 	"unicode/utf8"
+
+	"github.com/olup/kobowriter/matrix"
+	"github.com/olup/kobowriter/utils"
 )
 
 type TextView struct {
@@ -27,7 +30,7 @@ func (t *TextView) init(width int) {
 
 func (t *TextView) setContent(text string) {
 	t.content = text
-	t.wrapContent = strings.Split(wrapText(text, t.width), "\n")
+	t.wrapContent = strings.Split(utils.WrapText(text, t.width), "\n")
 
 	lineCount := []int{}
 	for _, line := range t.wrapContent {
@@ -42,8 +45,8 @@ func (t *TextView) setCursorIndex(index int) {
 	if index < 0 {
 		index = 0
 	}
-	if index > lenString(t.content) {
-		index = lenString(t.content)
+	if index > utils.LenString(t.content) {
+		index = utils.LenString(t.content)
 	}
 
 	// Processing
@@ -106,10 +109,10 @@ func (t *TextView) setCursorPos(position Position) {
 
 }
 
-func (t *TextView) renderMatrix() Matrix {
-	textMatrix := createMatrixFromText(t.content, t.width)
+func (t *TextView) renderMatrix() matrix.Matrix {
+	textMatrix := matrix.CreateMatrixFromText(t.content, t.width)
 	if t.cursorPos.x >= 0 && t.cursorPos.y >= 0 && t.cursorPos.x < t.width {
-		textMatrix[t.cursorPos.y][t.cursorPos.x].isInverted = true
+		textMatrix[t.cursorPos.y][t.cursorPos.x].IsInverted = true
 	}
 	endBound := t.scroll + t.height
 	if endBound > len(textMatrix) {
@@ -134,41 +137,4 @@ func (t *TextView) updateScroll() {
 	if t.scroll < 0 {
 		t.scroll = 0
 	}
-}
-
-func wrapLine(text string, lineWidth int) (wrapped string) {
-	if text == "" {
-		return ""
-	}
-
-	words := strings.Split(text, " ")
-	if len(words) == 0 {
-		return
-	}
-	wrapped = words[0]
-	spaceLeft := lineWidth - len(wrapped)
-	for _, word := range words[1:] {
-		if lenString(word)+1 > spaceLeft {
-			wrapped += "\n" + word
-			spaceLeft = lineWidth - lenString(word)
-		} else {
-			wrapped += " " + word
-			spaceLeft -= 1 + lenString(word)
-		}
-	}
-
-	return
-}
-
-func wrapText(text string, lineWidth int) string {
-	lines := strings.Split(text, "\n")
-	if len(lines) == 0 {
-		return ""
-	}
-	for i := range lines {
-		lines[i] = wrapLine(lines[i], lineWidth)
-	}
-
-	return strings.Join(lines, "\n")
-
 }

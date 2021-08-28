@@ -1,6 +1,6 @@
 //AZERTYkeybindings
 
-package main
+package event
 
 var KeyCode = map[int]string{
 	0: "KEY_RESERVED",

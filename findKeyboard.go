@@ -7,22 +7,22 @@ import (
 
 	"github.com/MarinX/keylogger"
 	"github.com/asaskevich/EventBus"
-	"github.com/shermp/go-fbink-v2/gofbink"
+
+	"github.com/olup/kobowriter/event"
+	"github.com/olup/kobowriter/screener"
 )
 
-func findKeyboard(screen *Screen, bus EventBus.Bus) {
+func findKeyboard(screen *screener.Screen, bus EventBus.Bus) {
 	// get key logger
 	keyboard := keylogger.FindKeyboardDevice()
 
 	buttonLogger, _ := keylogger.New("/dev/input/event0")
 	buttonChannel := buttonLogger.Read()
 
-	screen.fb.ClearScreen(&gofbink.FBInkConfig{
-		IsFlashing: true,
-	})
+	screen.Clear()
 
 	for len(keyboard) <= 0 {
-		printAlert("No keyboard found.\n\nPlug your keyboard or clic main button to quit.\n\nNote that [USB OTG MODE] must be turned on in order to detect the keyboard.", 30, screen)
+		screen.PrintAlert("No keyboard found.\n\nPlug your keyboard or clic main button to quit.\n\nNote that [USB OTG MODE] must be turned on in order to detect the keyboard.", 30)
 		time.Sleep(1 * time.Second)
 		select {
 		case _ = <-buttonChannel:
@@ -35,11 +35,11 @@ func findKeyboard(screen *Screen, bus EventBus.Bus) {
 		keyboard = keylogger.FindKeyboardDevice()
 	}
 
-	screen.fb.ClearScreen(&gofbink.FBInkConfig{})
+	screen.Clear()
 	fmt.Println("Found a keyboard at", keyboard)
 
 	k, _ := keylogger.New(keyboard)
-	go getKeyEvent(k, bus)
+	go event.BindKeyEvent(k, bus)
 	bus.Publish("ROUTING", "document")
 	return
 }

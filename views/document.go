@@ -1,4 +1,4 @@
-package main
+package views
 
 import (
 	"os"
@@ -6,49 +6,53 @@ import (
 	"time"
 
 	"github.com/asaskevich/EventBus"
+	"github.com/olup/kobowriter/event"
+	"github.com/olup/kobowriter/matrix"
+	"github.com/olup/kobowriter/screener"
+	"github.com/olup/kobowriter/utils"
 )
 
-func documentMount(screen *Screen, bus EventBus.Bus, documentPath string) func() {
+func Document(screen *screener.Screen, bus EventBus.Bus, documentPath string) func() {
 	docContent := []byte("")
 	if documentPath != "" {
 		docContent, _ = os.ReadFile(documentPath)
 	}
 	text := &TextView{
-		width:       int(screen.state.MaxCols) - 4,
-		height:      int(screen.state.MaxRows) - 2,
+		width:       int(screen.Width) - 4,
+		height:      int(screen.Height) - 2,
 		content:     "",
 		scroll:      0,
 		cursorIndex: 0,
 	}
 
 	text.setContent(string(docContent))
-	text.setCursorIndex(lenString(string(docContent)))
+	text.setCursorIndex(utils.LenString(string(docContent)))
 
-	onEvent := func(event KeyEvent) {
+	onEvent := func(e event.KeyEvent) {
 		linesToMove := 1
-		if event.isCtrl {
+		if e.IsCtrl {
 			linesToMove = text.height
 		}
 
 		// if date combo
-		if event.isChar {
-			text.setContent(insertAt(text.content, event.keyChar, text.cursorIndex))
+		if e.IsChar {
+			text.setContent(utils.InsertAt(text.content, e.KeyChar, text.cursorIndex))
 			text.setCursorIndex(text.cursorIndex + 1)
 		} else {
 			// if is modifier key
-			switch event.keyValue {
+			switch e.KeyValue {
 			case "KEY_BACKSPACE":
-				text.setContent(deleteAt(text.content, text.cursorIndex))
+				text.setContent(utils.DeleteAt(text.content, text.cursorIndex))
 				text.setCursorIndex(text.cursorIndex - 1)
 			case "KEY_DEL":
-				if text.cursorIndex < lenString(text.content) {
-					text.setContent(deleteAt(text.content, text.cursorIndex+1))
+				if text.cursorIndex < utils.LenString(text.content) {
+					text.setContent(utils.DeleteAt(text.content, text.cursorIndex+1))
 				}
 			case "KEY_SPACE":
-				text.setContent(insertAt(text.content, " ", text.cursorIndex))
+				text.setContent(utils.InsertAt(text.content, " ", text.cursorIndex))
 				text.setCursorIndex(text.cursorIndex + 1)
 			case "KEY_ENTER":
-				text.setContent(insertAt(text.content, "\n", text.cursorIndex))
+				text.setContent(utils.InsertAt(text.content, "\n", text.cursorIndex))
 				text.setCursorIndex(text.cursorIndex + 1)
 			case "KEY_RIGHT":
 				text.setCursorIndex(text.cursorIndex + 1)
@@ -67,13 +71,13 @@ func documentMount(screen *Screen, bus EventBus.Bus, documentPath string) func()
 			case "KEY_ESC":
 				bus.Publish("ROUTING", "menu")
 			case "KEY_F1":
-				text.setContent(insertAt(text.content, time.Now().Format("02/01/2006"), text.cursorIndex))
+				text.setContent(utils.InsertAt(text.content, time.Now().Format("02/01/2006"), text.cursorIndex))
 				text.setCursorIndex(text.cursorIndex + 10)
 			}
 		}
 
-		compiledMatrix := pasteMatrix(screen.originalMatrix, text.renderMatrix(), 2, 1)
-		screen.print(compiledMatrix)
+		compiledMatrix := matrix.PasteMatrix(screen.GetOriginalMatrix(), text.renderMatrix(), 2, 1)
+		screen.Print(compiledMatrix)
 
 		if documentPath != "" {
 			os.WriteFile(path.Join(documentPath), []byte(text.content), 0644)
@@ -83,7 +87,7 @@ func documentMount(screen *Screen, bus EventBus.Bus, documentPath string) func()
 	bus.SubscribeAsync("KEY", onEvent, false)
 
 	// display
-	bus.Publish("KEY", KeyEvent{})
+	bus.Publish("KEY", event.KeyEvent{})
 
 	return func() {
 		bus.Unsubscribe("KEY", onEvent)

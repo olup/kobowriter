@@ -1,4 +1,4 @@
-module olup.github.com/kobowriter
+module github.com/olup/kobowriter
 
 go 1.16
 

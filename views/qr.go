@@ -1,24 +1,26 @@
-package main
+package views
 
 import (
 	"os"
 
 	"github.com/asaskevich/EventBus"
-	"github.com/shermp/go-fbink-v2/gofbink"
+	"github.com/olup/kobowriter/event"
+	"github.com/olup/kobowriter/screener"
+	"github.com/olup/kobowriter/utils"
 	"github.com/skip2/go-qrcode"
 )
 
-func mountQr(screen *Screen, bus EventBus.Bus) func() {
-	onKey := func(event KeyEvent) {
-		screen.fb.ClearScreen(&gofbink.FBInkConfig{IsFlashing: true})
+func Qr(screen *screener.Screen, bus EventBus.Bus, saveLocation string) func() {
+	onKey := func(event event.KeyEvent) {
+		screen.Clear()
 		bus.Publish("ROUTING", "menu")
 	}
 
 	bus.SubscribeAsync("KEY", onKey, false)
 
 	// Display QR on mount
-	screen.fb.ClearScreen(&gofbink.FBInkConfig{IsFlashing: true})
-	config := loadConfig()
+	screen.Clear()
+	config := utils.LoadConfig(saveLocation)
 	content, err := os.ReadFile(config.LastOpenedDocument)
 	if err != nil {
 		bus.Publish("ROUTING", "menu")
@@ -26,7 +28,7 @@ func mountQr(screen *Screen, bus EventBus.Bus) func() {
 
 	image, _ := qrcode.Encode(string(content), qrcode.High, 800)
 
-	screen.printPng(image, 800, 800, 100, 100)
+	screen.PrintPng(image, 800, 800, 100, 100)
 
 	return func() {
 		bus.Unsubscribe("KEY", onKey)

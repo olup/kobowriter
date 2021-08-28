@@ -1,4 +1,4 @@
-package main
+package views
 
 import (
 	"os"
@@ -8,6 +8,10 @@ import (
 
 	"github.com/asaskevich/EventBus"
 	gonanoid "github.com/matoous/go-nanoid/v2"
+	"github.com/olup/kobowriter/event"
+	"github.com/olup/kobowriter/matrix"
+	"github.com/olup/kobowriter/screener"
+	"github.com/olup/kobowriter/utils"
 )
 
 type Option struct {
@@ -15,44 +19,44 @@ type Option struct {
 	action func()
 }
 
-func createMenu(title string, options []Option) func(screen *Screen, bus EventBus.Bus) func() {
-	return func(screen *Screen, bus EventBus.Bus) func() {
+func createMenu(title string, options []Option) func(screen *screener.Screen, bus EventBus.Bus) func() {
+	return func(screen *screener.Screen, bus EventBus.Bus) func() {
 		selected := 0
-		onKey := func(event KeyEvent) {
+		onKey := func(e event.KeyEvent) {
 
-			if event.keyValue == "KEY_UP" && selected > 0 {
+			if e.KeyValue == "KEY_UP" && selected > 0 {
 				selected--
 			}
-			if event.keyValue == "KEY_DOWN" && selected < len(options)-1 {
+			if e.KeyValue == "KEY_DOWN" && selected < len(options)-1 {
 				selected++
 			}
 
-			if event.keyValue == "KEY_ENTER" {
+			if e.KeyValue == "KEY_ENTER" {
 				options[selected].action()
 			}
 
 			line := 1
 
-			matrix := screen.originalMatrix
-			matrix = pasteMatrix(matrix, createMatrixFromText(title+"\n"+strings.Repeat("=", lenString(title)), lenString(title)), 4, line)
+			matrixx := screen.GetOriginalMatrix()
+			matrixx = matrix.PasteMatrix(matrixx, matrix.CreateMatrixFromText(title+"\n"+strings.Repeat("=", utils.LenString(title)), utils.LenString(title)), 4, line)
 
 			line += 2
 
 			for i, option := range options {
-				optionMatrix := createMatrixFromText(option.label, lenString(option.label))
+				optionMatrix := matrix.CreateMatrixFromText(option.label, utils.LenString(option.label))
 				if selected == i {
-					optionMatrix = inverseMatrix(optionMatrix)
+					optionMatrix = matrix.InverseMatrix(optionMatrix)
 				}
-				matrix = pasteMatrix(matrix, optionMatrix, 4, line+i)
+				matrixx = matrix.PasteMatrix(matrixx, optionMatrix, 4, line+i)
 			}
 
-			screen.print(matrix)
+			screen.Print(matrixx)
 		}
 
 		bus.SubscribeAsync("KEY", onKey, false)
 
 		// display
-		bus.Publish("KEY", KeyEvent{})
+		bus.Publish("KEY", event.KeyEvent{})
 
 		return func() {
 			bus.Unsubscribe("KEY", onKey)
@@ -60,7 +64,7 @@ func createMenu(title string, options []Option) func(screen *Screen, bus EventBu
 	}
 }
 
-func menuMount(screen *Screen, bus EventBus.Bus) func() {
+func MainMenu(screen *screener.Screen, bus EventBus.Bus, saveLocation string) func() {
 	options := []Option{
 		{
 			label: "Back",
@@ -85,9 +89,9 @@ func menuMount(screen *Screen, bus EventBus.Bus) func() {
 			action: func() {
 				id, _ := gonanoid.New()
 
-				config := loadConfig()
+				config := utils.LoadConfig(saveLocation)
 				config.LastOpenedDocument = path.Join(saveLocation, id+".txt")
-				saveConfig(config)
+				utils.SaveConfig(config, saveLocation)
 
 				bus.Publish("ROUTING", "document")
 			},
@@ -110,7 +114,7 @@ func menuMount(screen *Screen, bus EventBus.Bus) func() {
 	return createMenu("Menu", options)(screen, bus)
 }
 
-func fileMenuMount(screen *Screen, bus EventBus.Bus) func() {
+func FileMenu(screen *screener.Screen, bus EventBus.Bus, saveLocation string) func() {
 	files, _ := os.ReadDir(saveLocation)
 	options := []Option{
 		{
@@ -127,16 +131,16 @@ func fileMenuMount(screen *Screen, bus EventBus.Bus) func() {
 			content, _ := os.ReadFile(path.Join(saveLocation, file.Name()))
 
 			label := strings.Split(string(content), "\n")[0]
-			if lenString(label) > 30 {
+			if utils.LenString(label) > 30 {
 				label = string([]rune(label)[0:30]) + "..."
 			}
 			options = append(options, Option{
 				label: label,
 
 				action: func() {
-					config := loadConfig()
+					config := utils.LoadConfig(saveLocation)
 					config.LastOpenedDocument = filePath
-					saveConfig(config)
+					utils.SaveConfig(config, saveLocation)
 
 					bus.Publish("ROUTING", "document")
 				},
@@ -148,7 +152,7 @@ func fileMenuMount(screen *Screen, bus EventBus.Bus) func() {
 	return createMenu("Open File", options)(screen, bus)
 }
 
-func settingsMenuMount(screen *Screen, bus EventBus.Bus) func() {
+func SettingsMenu(screen *screener.Screen, bus EventBus.Bus, saveLocation string) func() {
 	options := []Option{
 		{
 			label: "Back",

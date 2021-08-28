@@ -5,9 +5,12 @@ import (
 	"os/exec"
 
 	"github.com/asaskevich/EventBus"
-	"github.com/shermp/go-fbink-v2/gofbink"
 
 	_ "embed"
+
+	"github.com/olup/kobowriter/screener"
+	"github.com/olup/kobowriter/utils"
+	"github.com/olup/kobowriter/views"
 )
 
 var saveLocation = "/mnt/onboard/.adds/kobowriter"
@@ -27,9 +30,9 @@ func main() {
 
 	// initialise fbink
 	fmt.Println("Init FBInk ...")
-	screen := Screen{}
-	screen.init()
-	defer screen.clean()
+
+	screen := screener.InitScreen()
+	defer screen.Clean()
 
 	bus := EventBus.New()
 
@@ -37,14 +40,11 @@ func main() {
 	defer close(c)
 
 	bus.SubscribeAsync("REQUIRE_KEYBOARD", func() {
-		findKeyboard(&screen, bus)
+		findKeyboard(screen, bus)
 	}, false)
 
 	bus.SubscribeAsync("QUIT", func() {
-		screen.fb.FBprint("Good bye", &gofbink.FBInkConfig{
-			IsInverted: true,
-			IsCleared:  true,
-		})
+		screen.PrintAlert("Good Bye !", 500)
 
 		// quitting
 		c <- true
@@ -59,19 +59,19 @@ func main() {
 
 		switch routeName {
 		case "document":
-			config := loadConfig()
-			unmount = documentMount(&screen, bus, config.LastOpenedDocument)
+			config := utils.LoadConfig(saveLocation)
+			unmount = views.Document(screen, bus, config.LastOpenedDocument)
 		case "menu":
-			unmount = menuMount(&screen, bus)
+			unmount = views.MainMenu(screen, bus, saveLocation)
 		case "file-menu":
-			unmount = fileMenuMount(&screen, bus)
+			unmount = views.FileMenu(screen, bus, saveLocation)
 		case "settings-menu":
-			unmount = settingsMenuMount(&screen, bus)
+			unmount = views.SettingsMenu(screen, bus, saveLocation)
 		case "qr":
-			unmount = mountQr(&screen, bus)
+			unmount = views.Qr(screen, bus, saveLocation)
 
 		default:
-			unmount = documentMount(&screen, bus, "")
+			unmount = views.Document(screen, bus, "")
 		}
 
 	}, false)
@@ -84,5 +84,7 @@ func main() {
 			break
 		}
 	}
+
+	println("yo")
 
 }
