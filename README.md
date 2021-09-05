@@ -46,11 +46,13 @@ You can build the software, put it on a KOBO with XCSoar software, and launch it
 
 Or you can use our modified XCSoar installer that will get you the XCSoar program, kernel, and Kobowriter in just one step :
 
+> You do this at your own risk !
+
 - Download the `KoboRoot.tar.gz` from the release page
 - Connect your kobo and place the archive in the .kobo (hidden) directory
 - eject safely, unplug, and let the kobo update
   
-Form now on your kobo will start up on XCSoar launcher. Form there you can start the stock kobo software, turn on usb-otg or start the KoboWriter.
+From now on your kobo will start up on XCSoar launcher. Form there you can start the stock kobo software, turn on usb-otg or start the KoboWriter.
 
 > Note that when USB-OTG is enable, you won't be able to start the stock Kobo software. But you need to have it on in order to use the KoboWriter software. Changing USB-OTG setting require a restart.
 
