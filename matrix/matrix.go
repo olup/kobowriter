@@ -98,6 +98,9 @@ func FillMatrix(in Matrix, char rune) (out Matrix) {
 }
 
 func CopyMatrix(in Matrix) (out Matrix) {
+	if len(in) == 0 {
+		return Matrix{}
+	}
 	out = CreateNewMatrix(len(in[0]), len(in))
 	for i := range out {
 		for j := range out[i] {

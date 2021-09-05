@@ -20,8 +20,7 @@ func main() {
 	fmt.Println("Program started")
 
 	// kill all nickel related stuff. Will need a reboot to find back the usual
-	fmt.Println("Killing kobo programs ...")
-	// exec.Command(`killall`, `-q`, `-TERM`, `nickel`, `hindenburg`, `sickel`, `fickel`, `adobehost`, `foxitpdf`, `iink`, `fmon`).Run()
+	fmt.Println("Killing XCSoar programs ...")
 	exec.Command("killall", "-s", "SIGKILL", "KoboMenu").Run()
 
 	// rotate screen

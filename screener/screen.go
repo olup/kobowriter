@@ -17,6 +17,8 @@ type Screen struct {
 	state          gofbink.FBInkState
 	Width          int
 	Height         int
+	fontType       string
+	ttSize         int
 }
 
 var dc = gg.NewContext(25, 40)
@@ -24,7 +26,8 @@ var charCache = map[string][]byte{}
 
 func InitScreen() (s *Screen) {
 	s = &Screen{}
-	dc.LoadFontFace("inc.ttf", 48)
+	s.fontType = "bitmap"
+
 	s.state = gofbink.FBInkState{}
 
 	fbinkOpts := gofbink.FBInkConfig{}
@@ -41,12 +44,17 @@ func InitScreen() (s *Screen) {
 	s.fb.GetState(&fbinkOpts, &s.state)
 
 	// clear screen on initialisation
-	s.fb.ClearScreen(&gofbink.FBInkConfig{
-		IsFlashing: true,
-	})
+	s.ClearFlash()
 
-	s.Width = int(s.state.MaxCols)
-	s.Height = int(s.state.MaxRows)
+	if s.fontType == "truetype" {
+		dc.LoadFontFace("inc.ttf", 96)
+		s.ttSize = 40
+		s.Width = int(s.state.ScreenWidth) / ((s.ttSize / 5) * 3)
+		s.Height = int(s.state.ScreenHeight) / s.ttSize
+	} else {
+		s.Width = int(s.state.MaxCols)
+		s.Height = int(s.state.MaxRows)
+	}
 
 	s.presentMatrix = matrix.CreateNewMatrix(s.Width, s.Height)
 	s.originalMatrix = matrix.CreateNewMatrix(s.Width, s.Height)
@@ -62,7 +70,7 @@ func (s *Screen) Clean() {
 }
 
 func (s *Screen) Print(matrix matrix.Matrix) {
-	printDiff(s.presentMatrix, matrix, s.fb)
+	printDiff(s.presentMatrix, matrix, s.fb, s.fontType, s.ttSize)
 	s.presentMatrix = matrix
 }
 
@@ -70,23 +78,51 @@ func same(a matrix.MatrixElement, b matrix.MatrixElement) bool {
 	return a.Content == b.Content && a.IsInverted == b.IsInverted
 }
 
-func printDiff(previous matrix.Matrix, next matrix.Matrix, fb *gofbink.FBInk) {
+func printDiff(previous matrix.Matrix, next matrix.Matrix, fb *gofbink.FBInk, fontType string, ttSize int) {
 	for i := range previous {
 		for j := range previous[i] {
 			if !same(previous[i][j], next[i][j]) {
-				fb.FBprint(string(next[i][j].Content), &gofbink.FBInkConfig{
-					Row:        int16(i),
-					Col:        int16(j),
-					NoRefresh:  true,
-					IsInverted: next[i][j].IsInverted,
-				})
+				if fontType == "truetype" {
+					ttWidth := ((ttSize / 5) * 3)
+					fb.ClearScreen(&gofbink.FBInkConfig{
+						IsInverted: next[i][j].IsInverted,
+						NoRefresh:  true,
+					}, &gofbink.FBInkRect{
+						Top:    uint16(i * ttSize),
+						Left:   uint16(j * ttWidth),
+						Height: uint16(ttSize),
+						Width:  uint16(ttWidth),
+					})
+
+					fb.PrintOT(string(next[i][j].Content), &gofbink.FBInkOTConfig{
+						Margins: struct {
+							Top    int16
+							Bottom int16
+							Left   int16
+							Right  int16
+						}{
+							Top:  int16(i * ttSize),
+							Left: int16(j * ttWidth),
+						},
+						SizePx:      uint16(ttSize),
+						IsFormatted: false,
+					}, &gofbink.FBInkConfig{IsInverted: next[i][j].IsInverted, NoRefresh: true})
+
+				} else {
+					fb.FBprint(string(next[i][j].Content), &gofbink.FBInkConfig{
+						Row:        int16(i),
+						Col:        int16(j),
+						NoRefresh:  true,
+						IsInverted: next[i][j].IsInverted,
+					})
+				}
 
 			}
 
 		}
 	}
 
-	fb.Refresh(0, 0, 0, 0, gofbink.HWDither(gofbink.WfmAUTO), &gofbink.FBInkConfig{})
+	fb.Refresh(0, 0, 0, 0, &gofbink.FBInkConfig{})
 }
 
 func (s *Screen) PrintPng(imgBytes []byte, w int, h int, x int, y int) {
@@ -112,18 +148,29 @@ func getCharImage(s string) []byte {
 }
 
 func (s *Screen) PrintAlert(message string, width int) {
-	matrixx := matrix.CreateMatrixFromText(message, width)
+	thisMatrix := matrix.CreateMatrixFromText(message, width)
 	x := math.Floor((float64(s.state.MaxCols)/2)-float64(width)/2) - 1
-	y := math.Floor((float64(s.state.MaxRows)/2)-float64(len(matrixx))/2) - 1
-	outerMatrix := matrix.CreateNewMatrix(width+2, len(matrixx)+2)
-	matrixx = matrix.PasteMatrix(outerMatrix, matrixx, 1, 1)
-	matrixx = matrix.InverseMatrix(matrixx)
-	s.Print(matrix.PasteMatrix(s.originalMatrix, matrixx, int(x), int(y)))
+	y := math.Floor((float64(s.state.MaxRows)/2)-float64(len(thisMatrix))/2) - 1
+	outerMatrix := matrix.CreateNewMatrix(width+2, len(thisMatrix)+2)
+	thisMatrix = matrix.PasteMatrix(outerMatrix, thisMatrix, 1, 1)
+	thisMatrix = matrix.InverseMatrix(thisMatrix)
+	s.Print(matrix.PasteMatrix(s.originalMatrix, thisMatrix, int(x), int(y)))
 }
 
 func (s *Screen) Clear() {
-	s.fb.ClearScreen(&gofbink.FBInkConfig{})
+	s.fb.ClearScreen(&gofbink.FBInkConfig{}, &gofbink.FBInkRect{})
 	s.presentMatrix = matrix.FillMatrix(s.presentMatrix, ' ')
+}
+
+func (s *Screen) ClearFlash() {
+	s.fb.ClearScreen(&gofbink.FBInkConfig{IsFlashing: true}, &gofbink.FBInkRect{})
+	s.presentMatrix = matrix.FillMatrix(s.presentMatrix, ' ')
+}
+
+func (s *Screen) RefreshFlash() {
+	presenMatrix := s.presentMatrix
+	s.ClearFlash()
+	s.Print(presenMatrix)
 }
 
 func (s *Screen) GetOriginalMatrix() matrix.Matrix {

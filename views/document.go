@@ -73,6 +73,9 @@ func Document(screen *screener.Screen, bus EventBus.Bus, documentPath string) fu
 			case "KEY_F1":
 				text.setContent(utils.InsertAt(text.content, time.Now().Format("02/01/2006"), text.cursorIndex))
 				text.setCursorIndex(text.cursorIndex + 10)
+
+			case "KEY_F12":
+				screen.RefreshFlash()
 			}
 		}
 

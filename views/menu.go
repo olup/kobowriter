@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"sort"
 	"strings"
 
 	"github.com/asaskevich/EventBus"
@@ -124,6 +125,17 @@ func FileMenu(screen *screener.Screen, bus EventBus.Bus, saveLocation string) fu
 			},
 		},
 	}
+
+	sort.Slice(files, func(i, j int) bool {
+		infoI, _ := files[i].Info()
+		modTimeI := infoI.ModTime().Unix()
+
+		infoJ, _ := files[j].Info()
+		modTimeJ := infoJ.ModTime().Unix()
+
+		return modTimeI > modTimeJ
+	})
+
 	for _, file := range files {
 
 		if strings.HasSuffix(file.Name(), ".txt") {

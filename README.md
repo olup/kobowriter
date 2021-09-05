@@ -14,7 +14,9 @@ This project brings the same form factor for a considerably cheaper this way (es
 
 ## How it looks like
 
-*Todo*
+![From face](assets/face.jpg)
+
+![From side](assets/side.jpg)
 
 ## How it works
 
