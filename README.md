@@ -8,9 +8,12 @@ This small project aims to let you use your old KOBO e-reader (mine is a GLO HD)
 
 For years I thought that e-ink was the ultimate medium to write in broad daylight without eye strain of focus fatigue. It seems that others have had the same ideas as we can see in the [Freewrite](https://getfreewrite.com/) or [Pomera](https://www.kickstarter.com/projects/2132003782/pomera-pocket-typewriter-with-e-ink?ref=category_newest&amp;ref=discovery) products.
 
-This project brings the same form factor for a considerably cheaper this way (especially if like me you already have a KOBO at hand).
+This project brings the same form factor in a considerably cheaper way (especially if like me you already have a KOBO at hand).
 
 > Note that the installed software should let you use switch between your normal kobo stock software and the KoboWriter one ; so your kobo is still usable in its default way.
+
+> Because XCSoar USB OTG should work for many KOBO devices (touch, Mini, Glo HD and pretty much all the later ones), this project would work there too. But as of now this program has only been built and tested for the KOBO GLO HD and only supports the AZERTY (French) Keyboard. You can open issues if you need to support other device / keyboard
+
 
 ## How it looks like
 
@@ -34,6 +37,8 @@ The software lets you use the keyboard to write and edit text files. It's coded 
 > Note that we also provide ready made precompiled binaries for your KOBO
 
 First you need to download and build the **koxtoolchain** on you development computer. This toolchain, once built, will let you build Go program that can run on the KOBO.
+
+*TODO : Detailed step to build project*
 
 ## How to install
 
