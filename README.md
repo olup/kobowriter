@@ -20,6 +20,8 @@ This project brings the same form factor in a considerably cheaper way (especial
 
 ![From side](assets/side.jpg)
 
+*TODO add video*
+
 ## How it works
 
 The kobo e-readers have a Micro-USB connector to charge and transfer files. With proper kernel modification this USB socket can be used as OTG, letting one plug in any kind of USB device.
