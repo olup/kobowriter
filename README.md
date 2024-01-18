@@ -40,9 +40,20 @@ The software lets you use the keyboard to write and edit text files. It's coded 
 
 First you need to download and build the **koxtoolchain** on your development computer. This toolchain, once built, will let you build Go programs that can run on the KOBO.
 
-*TODO : Detailed step to build project*
+### Step by step built
 
-new branch test
+Note: Using WSL (problems with case-sensitivity in memory) or Github Codespace (long built) is a bit tricky. I recommend using a real Ubuntu machine.
+
+1. Clone or download <https://github.com/koreader/koxtoolchain>
+2. install its dependancies: `sudo apt-get install build-essential autoconf automake bison flex gawk libtool libtool-bin libncurses-dev curl file git gperf help2man texinfo unzip wget`
+3. inside the folder run `./gen-tc.sh kobo` (I wonder if one could use the [prebuild version]([url](https://github.com/koreader/koxtoolchain/releases))) this may take more than 2 hours
+4. run the `source /home/UserName/Downloads/kobowriter-main/refs/x-compile.sh kobo env bare` as recommended at the end of your build
+5. Make sure you have golang-go installed on your linux distro (via apt or snap, ...)
+6. Clode or download <https://github.com/olup/kobowriter>
+7. inside its main folder, run make.
+8. Kobowriter will be in the build folder.
+
+Note: If you have installed XCSoar with the archive tar.gz below, you can swap your custom build kobowriter with the one in the .adds/kobowriter folder. Like this, you can have custom keyboard layout by modifying the event/key.go and build your own kobowriter.
 
 ## How to install
 
