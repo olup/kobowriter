@@ -87,11 +87,6 @@ func printDiff(previous matrix.Matrix, next matrix.Matrix, fb *gofbink.FBInk, fo
 					fb.ClearScreen(&gofbink.FBInkConfig{
 						IsInverted: next[i][j].IsInverted,
 						NoRefresh:  true,
-					}, &gofbink.FBInkRect{
-						Top:    uint16(i * ttSize),
-						Left:   uint16(j * ttWidth),
-						Height: uint16(ttSize),
-						Width:  uint16(ttWidth),
 					})
 
 					fb.PrintOT(string(next[i][j].Content), &gofbink.FBInkOTConfig{
@@ -122,7 +117,7 @@ func printDiff(previous matrix.Matrix, next matrix.Matrix, fb *gofbink.FBInk, fo
 		}
 	}
 
-	fb.Refresh(0, 0, 0, 0, &gofbink.FBInkConfig{})
+	fb.Refresh(0, 0, 0, 0, gofbink.DitherFloydSteingberg ,&gofbink.FBInkConfig{})
 }
 
 func (s *Screen) PrintPng(imgBytes []byte, w int, h int, x int, y int) {
@@ -158,12 +153,12 @@ func (s *Screen) PrintAlert(message string, width int) {
 }
 
 func (s *Screen) Clear() {
-	s.fb.ClearScreen(&gofbink.FBInkConfig{}, &gofbink.FBInkRect{})
+	s.fb.ClearScreen(&gofbink.FBInkConfig{})
 	s.presentMatrix = matrix.FillMatrix(s.presentMatrix, ' ')
 }
 
 func (s *Screen) ClearFlash() {
-	s.fb.ClearScreen(&gofbink.FBInkConfig{IsFlashing: true}, &gofbink.FBInkRect{})
+	s.fb.ClearScreen(&gofbink.FBInkConfig{IsFlashing: true})
 	s.presentMatrix = matrix.FillMatrix(s.presentMatrix, ' ')
 }
 
