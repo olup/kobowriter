@@ -42,6 +42,8 @@ First you need to download and build the **koxtoolchain** on your development co
 
 *TODO : Detailed step to build project*
 
+new branch test
+
 ## How to install
 
 You can build the software, put it on a KOBO with XCSoar software, and launch it any way you see fit.
