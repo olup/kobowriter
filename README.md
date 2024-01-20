@@ -40,20 +40,42 @@ The software lets you use the keyboard to write and edit text files. It's coded 
 
 First you need to download and build the **koxtoolchain** on your development computer. This toolchain, once built, will let you build Go programs that can run on the KOBO.
 
-### Step by step built
+### Step by step local built
 
 Note: Using WSL (problems with case-sensitivity in memory) or Github Codespace (long built) is a bit tricky. I recommend using a real Ubuntu machine.
 
 1. Clone or download <https://github.com/koreader/koxtoolchain>
 2. install its dependancies: `sudo apt-get install build-essential autoconf automake bison flex gawk libtool libtool-bin libncurses-dev curl file git gperf help2man texinfo unzip wget`
-3. inside the folder run `./gen-tc.sh kobo` (I wonder if one could use the [prebuild version]([url](https://github.com/koreader/koxtoolchain/releases))) this may take more than 2 hours
+3. inside the folder run `./gen-tc.sh kobo` this may take more than 2 hours. (instead you could use the [prebuild version](https://github.com/koreader/koxtoolchain/releases) and unzip, untar in your home folder)
 4. run the `source /home/UserName/Downloads/kobowriter-main/refs/x-compile.sh kobo env bare` as recommended at the end of your build
 5. Make sure you have golang-go installed on your linux distro (via apt or snap, ...)
-6. Clode or download <https://github.com/olup/kobowriter>
-7. inside its main folder, run make.
+6. Clone or download <https://github.com/olup/kobowriter> (you can modify event/key.go for other keyboard layout)
+7. inside its main folder, run `make`.
 8. Kobowriter will be in the build folder.
 
-Note: If you have installed XCSoar with the archive tar.gz below, you can swap your custom build kobowriter with the one in the .adds/kobowriter folder. Like this, you can have custom keyboard layout by modifying the event/key.go and build your own kobowriter.
+### Step by step Codespace built
+
+[Codespace](https://github.com/features/codespaces) is a Ubunutu environement that you can use for free in any of your repo directly on the github website.
+
+1. Fork <https://github.com/koreader/koxtoolchain> (green button)
+2. In your new fork, start a new codespace in the GitHub Web UI
+3. Once your codespace is runing type in terinal : `cd "$HOME"`
+4. then download the ToolChain prebuild by runnung `wget https://github.com/koreader/koxtoolchain/releases/download/2021.12/kobo.zip`
+5. then: `unzip kobo.zip`
+6. then: `tar -xvzf kobo.tar.gz`
+7. You should have the x-tools listed in the repo now, you can check with `ls`
+8. Open new terminal and add a file name `x-compile.sh` in your main repo (left column)
+9. Open the file and copy paste the content from <https://github.com/koreader/koxtoolchain/blob/master/refs/x-compile.sh> (you can also download that single file and uploaded it to your codespace)
+10. Run: `source x-compile.sh kobo env bare`
+11. Run: `make` (you can modify event/key.go for other keyboard layout before make)
+
+Notes: 
+
+- Note: if [PR](https://github.com/olup/kobowriter/pull/19/commits/cb27c63a494a55f4b287ee2ac03843809a5d734f) has not been accepted or merge, you have to modify the file screener/screen.go with the folowing [lines](https://github.com/olup/kobowriter/blob/cb27c63a494a55f4b287ee2ac03843809a5d734f/screener/screen.go)
+
+- If you have installed XCSoar with the archive tar.gz below, you can swap your custom build kobowriter with the one in the .adds/kobowriter folder. Like this, you can have custom keyboard layout by modifying the event/key.go and build your own kobowriter.
+
+- You can add other app to launch from the XCSoar interface by adding file in the .kobo/XCSoarData/. For example, add a file containing the following line for adding koreader to the tool list in XCSoar
 
 ## How to install
 
