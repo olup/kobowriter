@@ -68,6 +68,9 @@ Note: Using WSL (problems with case-sensitivity in memory) or Github Codespace (
 9. Open the file and copy paste the content from <https://github.com/koreader/koxtoolchain/blob/master/refs/x-compile.sh> (you can also download that single file and uploaded it to your codespace)
 10. Run: `source x-compile.sh kobo env bare`
 11. Run: `make` (you can modify event/key.go for other keyboard layout before make)
+12. Remove the kobowriter from the .ignore file
+13. push your changes in your repo.
+14. You new kobowriter will be in the build folder of your repo on the github website!
 
 Notes: 
 
